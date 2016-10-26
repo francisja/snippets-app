@@ -113,3 +113,14 @@ DEBUG:root:Database connection established.
 INFO:root:Constructing parser
 DEBUG:root:Constructing put subparser
 INFO:root:Retrieving snippet 'Test'
+DEBUG:root:Connecting to PostgreSQL
+DEBUG:root:Database connection established.
+INFO:root:Constructing parser
+DEBUG:root:Constructing put subparser
+INFO:root:Storing snippet 'Test2': 'This is another test'
+DEBUG:root:Snippet stored succesfully.
+DEBUG:root:Connecting to PostgreSQL
+DEBUG:root:Database connection established.
+INFO:root:Constructing parser
+DEBUG:root:Constructing put subparser
+INFO:root:Retrieving snippet 'Test2'

@@ -10,15 +10,14 @@ logging.debug("Database connection established.")
 def put(name, snippet):
     """Store a snippet with an associated name."""
     logging.info("Storing snippet {!r}: {!r}".format(name, snippet))
-    cursor = connection.cursor()
-    try:
-        command = "insert into snippets values (%s, %s)"
-        cursor.execute(command, (name, snippet))
-    except psycopg2.IntegrityError as e:
-        connection.rollback()
-        command = "update snippets set message=%s where keyword=%s"
-        cursor.execute(command, (snippet, name))
-    connection.commit()
+    with connection, connection.cursor() as cursor:
+        try:
+            command = "insert into snippets values (%s, %s)"
+            cursor.execute(command, (name, snippet))
+        except psycopg2.IntegrityError as e:
+            connection.rollback()
+            command = "update snippets set message=%s where keyword=%s"
+            cursor.execute(command, (snippet, name))
     logging.debug("Snippet stored succesfully.")
     return name, snippet
 
@@ -26,10 +25,9 @@ def get(name):
     """Retrieve the snippet with a given name.
     """
     logging.info("Retrieving snippet {!r}".format(name))
-    cursor = connection.cursor()
-    command = "select message from snippets where keyword=%s"
-    cursor.execute(command, (name,))
-    row = cursor.fetchone()
+    with connection, connection.cursor() as cursor:
+        cursor.execute("select message from snippets where keyword=%s", (name,))
+        row = cursor.fetchone()
     if not row:
         #No snippet was found with that name
         return "404: Snippet Not Found"
