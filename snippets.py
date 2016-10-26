@@ -11,22 +11,29 @@ def put(name, snippet):
     """Store a snippet with an associated name."""
     logging.info("Storing snippet {!r}: {!r}".format(name, snippet))
     cursor = connection.cursor()
-    command = "insert into snippets values (%s, %s)"
-    cursor.execute(command, (name, snippet))
+    try:
+        command = "insert into snippets values (%s, %s)"
+        cursor.execute(command, (name, snippet))
+    except psycopg2.IntegrityError as e:
+        connection.rollback()
+        command = "update snippets set message=%s where keyword=%s"
+        cursor.execute(command, (snippet, name))
     connection.commit()
     logging.debug("Snippet stored succesfully.")
     return name, snippet
 
 def get(name):
     """Retrieve the snippet with a given name.
-
-    Returns the snippet.
     """
     logging.info("Retrieving snippet {!r}".format(name))
     cursor = connection.cursor()
     command = "select message from snippets where keyword=%s"
     cursor.execute(command, (name,))
-    return name, cursor.fetchone()[0]
+    row = cursor.fetchone()
+    if not row:
+        #No snippet was found with that name
+        return "404: Snippet Not Found"
+    return name, row[0]
     
 def main():
     """Main function"""
@@ -57,6 +64,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-put("list", "A sequence of things - created using []")
-get("list")
